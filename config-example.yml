@@ -1,0 +1,8 @@
+launch_agent_label: "com.user.secret.agent"
+home: "~"
+launch_agent_dir: "~/Library/LaunchAgents"
+plist_path: "~/Library/LaunchAgents/com.user.secret.agent.plist"
+host_listen: "127.0.0.1"
+port_listen: 41215
+cert: "/{YOUR_PROJECT_PATH}/.mitmproxy/mitmproxy-ca-cert.pem"
+curr_project_dir: "/{YOUR_PROJECT_PATH}"
