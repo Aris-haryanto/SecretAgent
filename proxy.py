@@ -1,7 +1,7 @@
 import os
 import sys
 from utils import run_command
-from cleanup import cleanup
+# from cleanup import cleanup
 from init import load_config
 
 config = load_config('config.yml')
@@ -12,7 +12,7 @@ def get_network_services():
     output = output.splitlines()
     if output is None:
         print("Failed to retrieve network services. Please check your network configuration.")
-        cleanup()
+        # cleanup()
         sys.exit(1)
     
     # Skip the first line (header) and filter out disabled services
@@ -123,7 +123,7 @@ def configure_proxy(enable=True):
     services = get_network_services()
     if not services:
         print("No network services found.")
-        cleanup()
+        # cleanup()
         sys.exit(1)
 
     if enable:

@@ -1,7 +1,7 @@
 import getpass
 import subprocess
 import sys
-from cleanup import cleanup
+# from cleanup import cleanup
 
 def run_command(cmd, sudo=False, capture_output=False):
     if sudo and getpass.getuser() != "root":
@@ -19,5 +19,5 @@ def run_command(cmd, sudo=False, capture_output=False):
             print(f"stdout: {e.stdout}")
             print(f"stderr: {e.stderr}")
 
-        cleanup()    
+        # cleanup()    
         sys.exit(1)
