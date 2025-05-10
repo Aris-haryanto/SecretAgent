@@ -1,11 +1,9 @@
 import os
 import sys
 from utils import run_command
+from init import load_config
 
-HOST_LISTEN = "127.0.0.1"
-PORT_LISTEN = "41215"
-PROXY_PROFILE_FILENAME = ".proxy_env"
-SOURCE_LINE_TEMPLATE = 'source ~/{proxy_profile}'
+config = load_config('config.yml')
 
 def get_network_services():
     """Get a list of all network services on macOS."""
@@ -22,8 +20,8 @@ def get_network_services():
 def set_system_proxy(service, enable):
     """Enable or disable HTTP and HTTPS proxy for a network service."""
     if enable:
-        run_command(["networksetup", "-setwebproxy", service, f"{HOST_LISTEN}", f"{PORT_LISTEN}"])
-        run_command(["networksetup", "-setsecurewebproxy", service, f"{HOST_LISTEN}", f"{PORT_LISTEN}"])
+        run_command(["networksetup", "-setwebproxy", service, f"{config['host_listen']}", f"{config['port_listen']}"])
+        run_command(["networksetup", "-setsecurewebproxy", service, f"{config['host_listen']}", f"{config['port_listen']}"])
         run_command(["networksetup", "-setwebproxystate", service, "on"])
         run_command(["networksetup", "-setsecurewebproxystate", service, "on"])
     else:
@@ -47,35 +45,41 @@ def get_user_shell_profiles():
     return profile_files
 
 def create_proxy_profile():
-    """Create the dedicated proxy profile file with environment variable settings."""
     home_dir = os.path.expanduser("~")
-    proxy_profile_path = os.path.join(home_dir, PROXY_PROFILE_FILENAME)
-    content = f"""# Proxy environment variables added by configure_proxy.py
+    proxy_env_path = os.path.join(home_dir, config['proxy_file'])
+    # If file missing, create with basic template content
+    if not os.path.exists(proxy_env_path):
+        try:
+            with open(proxy_env_path, "w") as f:
+                content = (f"""# Proxy environment variables added by configure_proxy.py
 
-export HTTP_PROXY="http://{HOST_LISTEN}:{PORT_LISTEN}"
-export http_proxy="http://{HOST_LISTEN}:{PORT_LISTEN}"
-export HTTPS_PROXY="http://{HOST_LISTEN}:{PORT_LISTEN}"
-export https_proxy="http://{HOST_LISTEN}:{PORT_LISTEN}"
-export ALL_PROXY="http://{HOST_LISTEN}:{PORT_LISTEN}"
-export all_proxy="http://{HOST_LISTEN}:{PORT_LISTEN}"
+export HTTP_PROXY="http://{config['host_listen']}:{config['port_listen']}"
+export http_proxy="http://{config['host_listen']}:{config['port_listen']}"
+export HTTPS_PROXY="http://{config['host_listen']}:{config['port_listen']}"
+export https_proxy="http://{config['host_listen']}:{config['port_listen']}"
+export ALL_PROXY="http://{config['host_listen']}:{config['port_listen']}"
+export all_proxy="http://{config['host_listen']}:{config['port_listen']}"
 export NO_PROXY="localhost,127.0.0.1,::1"
 export no_proxy="localhost,127.0.0.1,::1"
 """
-    with open(proxy_profile_path, "w") as f:
-        f.write(content)
-    print(f"Created proxy profile file at {proxy_profile_path}")
+                )
+                f.write(content)
+            print(f"Restored {config['proxy_file']} with default proxy variables.")
+        except Exception as e:
+            print(f"Failed to restore {config['proxy_file']}: {e}")
+
 
 def remove_proxy_profile():
     """Remove the dedicated proxy profile file if it exists."""
     home_dir = os.path.expanduser("~")
-    proxy_profile_path = os.path.join(home_dir, PROXY_PROFILE_FILENAME)
+    proxy_profile_path = os.path.join(home_dir, config['proxy_file'])
     if os.path.exists(proxy_profile_path):
         os.remove(proxy_profile_path)
         print(f"Removed proxy profile file {proxy_profile_path}")
 
 def add_source_line_to_profile(profile_path):
     """Add source line to a profile file if not present."""
-    source_line = SOURCE_LINE_TEMPLATE.format(proxy_profile=PROXY_PROFILE_FILENAME)
+    source_line = config['source_proxy'].format(proxy_profile=config['proxy_file'])
     if not os.path.exists(profile_path):
         # Create empty profile file
         with open(profile_path, "w") as f:
@@ -92,7 +96,7 @@ def remove_source_line_from_profile(profile_path):
     """Remove source line from a profile file if present."""
     if not os.path.exists(profile_path):
         return
-    source_line = SOURCE_LINE_TEMPLATE.format(proxy_profile=PROXY_PROFILE_FILENAME)
+    source_line = config['source_proxy'].format(proxy_profile=config['proxy_file'])
     with open(profile_path, "r") as f:
         lines = f.readlines()
     new_lines = [line for line in lines if line.strip() != source_line and line.strip() != "# Source proxy environment variables"]

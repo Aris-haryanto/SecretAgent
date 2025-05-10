@@ -4,7 +4,7 @@ import subprocess
 import threading
 from utils import run_command
 from proxy import configure_proxy
-from watch_profile import watch_proxy_env_file
+from watch_proxy import check_and_restore_source_lines, watch_proxy_env_file_and_system_proxy
 from plist import write_launch_agent,unload_and_remove_launch_agent
 from certificate import remove_cert_from_keychain, install_cert_to_keychain
 from intercept import run_proxy_server
@@ -57,7 +57,8 @@ def main():
     signal.signal(signal.SIGTERM, signal_handler)
 
     # Create a thread for the watch_proxy_env_file function
-    watcher_thread = threading.Thread(target=watch_proxy_env_file)
+    watcher_thread = threading.Thread(target=check_and_restore_source_lines)
+    watcher_thread = threading.Thread(target=watch_proxy_env_file_and_system_proxy)
     watcher_thread.daemon = True  # This makes the thread exit when the main program exits
     watcher_thread.start()  # Start the thread
 
