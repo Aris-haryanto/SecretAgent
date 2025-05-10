@@ -14,7 +14,7 @@ def write_launch_agent():
 
     plist = {
         "Label": config['launch_agent_label'],
-        "ProgramArguments": [python_executable, script_path, "--run-proxy"],
+        "ProgramArguments": [python_executable, script_path, "--intercept-on"],
         "RunAtLoad": True,
         "KeepAlive": True,
         "StandardOutPath": os.path.join(config['curr_project_dir'], "agent.log"),

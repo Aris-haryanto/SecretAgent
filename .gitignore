@@ -176,3 +176,4 @@ cython_debug/
 kocak
 .kocak
 config.yml
+.DS_Store

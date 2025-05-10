@@ -2,8 +2,10 @@ import os
 import time
 import sys
 import subprocess
-from init import load_config
 from proxy import set_system_proxy,get_network_services,get_user_shell_profiles,create_proxy_profile
+from cleanup import cleanup
+from init import load_config
+
 
 config = load_config('config.yml')
 
@@ -148,7 +150,8 @@ def watch_proxy_env_file_and_system_proxy():
 
             time.sleep(60)
         except KeyboardInterrupt:
-            print("Stopping watch_proxy_env.py script.")
+            print("Stopping SecretAgent.")
+            cleanup()
             sys.exit(0)
         except Exception as e:
             print(f"Error during watching: {e}")

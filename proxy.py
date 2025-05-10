@@ -1,6 +1,7 @@
 import os
 import sys
 from utils import run_command
+from cleanup import cleanup
 from init import load_config
 
 config = load_config('config.yml')
@@ -11,6 +12,7 @@ def get_network_services():
     output = output.splitlines()
     if output is None:
         print("Failed to retrieve network services. Please check your network configuration.")
+        cleanup()
         sys.exit(1)
     
     # Skip the first line (header) and filter out disabled services
@@ -51,7 +53,7 @@ def create_proxy_profile():
     if not os.path.exists(proxy_env_path):
         try:
             with open(proxy_env_path, "w") as f:
-                content = (f"""# Proxy environment variables added by configure_proxy.py
+                content = (f"""# Proxy environment variables added by SecretAgent
 
 export HTTP_PROXY="http://{config['host_listen']}:{config['port_listen']}"
 export http_proxy="http://{config['host_listen']}:{config['port_listen']}"
@@ -83,7 +85,7 @@ def add_source_line_to_profile(profile_path):
     if not os.path.exists(profile_path):
         # Create empty profile file
         with open(profile_path, "w") as f:
-            f.write(f"# Created by configure_proxy.py\n")
+            f.write(f"# Created by SecretAgent\n")
     with open(profile_path, "r") as f:
         lines = f.readlines()
     stripped_lines = [line.strip() for line in lines]
@@ -121,6 +123,7 @@ def configure_proxy(enable=True):
     services = get_network_services()
     if not services:
         print("No network services found.")
+        cleanup()
         sys.exit(1)
 
     if enable:

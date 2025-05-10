@@ -6,8 +6,9 @@ from utils import run_command
 from proxy import configure_proxy
 from watch_proxy import check_and_restore_source_lines, watch_proxy_env_file_and_system_proxy
 from plist import write_launch_agent,unload_and_remove_launch_agent
-from certificate import remove_cert_from_keychain, install_cert_to_keychain
+from certificate import install_cert_to_keychain
 from intercept import run_proxy_server
+from cleanup import cleanup
 from init import load_config
 
 config = load_config("config.yml")
@@ -15,14 +16,7 @@ config = load_config("config.yml")
 # Create a global variable to control the thread
 stop_event = threading.Event()
 
-def cleanup():
-    print("Starting cleanup of all registered components...")
 
-    unload_and_remove_launch_agent()
-    remove_cert_from_keychain()
-    configure_proxy(False)
-
-    print("Cleanup complete.")
 
 def kill_process_on_port():
     try:
@@ -56,52 +50,49 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
-    # Create a thread for the watch_proxy_env_file function
-    watcher_thread = threading.Thread(target=check_and_restore_source_lines)
-    watcher_thread = threading.Thread(target=watch_proxy_env_file_and_system_proxy)
-    watcher_thread.daemon = True  # This makes the thread exit when the main program exits
-    watcher_thread.start()  # Start the thread
-
-     # Signal the watcher thread to stop
-    stop_event.set()
-
-
     if len(sys.argv) == 1:
         print("Usage:")
-        print("Secret Agent [OPTIONS]")
+        print("SecretAgent [OPTIONS]")
         print("")
         print("Options:")
-        print("  --run-proxy     Run the proxy server immediately (default action)")
-        print("  --startup       Install cert, register launch agent to run proxy at startup")
-        print("  --cleanup       Remove launch agent and uninstall certificate")
-        print("")
-        print("Examples:")
-        print("Secret Agent --run-proxy")
-        print("Secret Agent --startup")
-        print("Secret Agent --cleanup")
+        print("  --intercept-on     Run Intercept immediately (default action)")
+        print("  --startup          register startup agent to run intercept at startup")
+        print("  --intercept-off    Stop Intercept agent and uninstall certificate")
+        print("  --remove-startup   remove agent at startup")
         print("")
         sys.exit(0)
 
-    if "--cleanup" in sys.argv:
+    if "--startup" in sys.argv:
+        write_launch_agent()
+
+        print("Startup registration complete. Proxy will run continuously at startup.")
+    
+    if "--remove-startup" in sys.argv:
+        unload_and_remove_launch_agent()
+
+        print("Remove from Startup complete.")
+
+    if "--intercept-off" in sys.argv:
         cleanup()
         return
 
-    if "--startup" in sys.argv:
-        kill_process_on_port()
-        install_cert_to_keychain()
-        write_launch_agent()
-        configure_proxy(True)
+    if "--intercept-on" in sys.argv:
+        # Create a thread for the watch_proxy_env_file function
+        watcher_thread = threading.Thread(target=check_and_restore_source_lines)
+        watcher_thread = threading.Thread(target=watch_proxy_env_file_and_system_proxy)
+        watcher_thread.daemon = True  # This makes the thread exit when the main program exits
+        watcher_thread.start()  # Start the thread
 
-        print("Startup registration complete. Proxy will run continuously at startup.")
-
-    if "--run-proxy" in sys.argv:
+        # Signal the watcher thread to stop
+        stop_event.set()
+        
         kill_process_on_port()
         install_cert_to_keychain()
         configure_proxy(True)
         run_proxy_server()
-
-    # Wait for the watcher thread to finish
-    watcher_thread.join()
+        
+        # Wait for the watcher thread to finish
+        watcher_thread.join()
 
 if __name__ == "__main__":
     main()

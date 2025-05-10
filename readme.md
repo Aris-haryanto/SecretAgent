@@ -23,7 +23,7 @@ python3 install -r requirements.txt
 
 ### Run
 ```
-python3 main.py --run-proxy
+python3 main.py --intercept-on
 ```
 
 ### download llama
