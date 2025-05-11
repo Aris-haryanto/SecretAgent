@@ -19,7 +19,7 @@ clean:
 # Build standalone binary using PyInstaller
 build:
 	@echo "Building standalone binary $(BINARY_NAME) for Apple Silicon (arm64)..."
-	# Make sure to run this on Apple Silicon macOS with an arm64 Python environment
+# Make sure to run this on Apple Silicon macOS with an arm64 Python environment
 	$(PYINSTALLER) --onefile --name $(BINARY_NAME) $(SCRIPT)
 	@echo "Build complete! Find the binary at $(OUTPUT_DIR)/$(BINARY_NAME)"
 

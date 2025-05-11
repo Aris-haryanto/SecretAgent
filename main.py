@@ -6,23 +6,36 @@ from utils import run_command
 from proxy import configure_proxy
 from watch_proxy import check_and_restore_source_lines, watch_proxy_env_file_and_system_proxy
 from plist import write_launch_agent,unload_and_remove_launch_agent
-from certificate import install_cert_to_keychain
+from certificate import install_cert_to_keychain, remove_cert_from_keychain
 from intercept import run_proxy_server
-from cleanup import cleanup
-from init import load_config
+from env import (
+    ENV_LAUNCH_AGENT_LABEL,
+    ENV_HOME,
+    ENV_LAUNCH_AGENT_DIR,
+    ENV_PLIST_PATH,
+    ENV_HOST_LISTEN,
+    ENV_PORT_LISTEN,
+    ENV_CERT,
+    ENV_CURR_PROJECT_DIR,
+    ENV_PROXY_FILE,
+    ENV_SOURCE_PROXY
+)
 
-config = load_config("config.yml")
+
 
 # Create a global variable to control the thread
 stop_event = threading.Event()
 
-
+def cleanup():
+    print("Stop intercept ...")
+    configure_proxy(False)
+    print("Intercept Complete.")
 
 def kill_process_on_port():
     try:
         # Get the list of processes using the specified port
         result = subprocess.run(
-            ["lsof", "-t", f"-i:{config['port_listen']}"],
+            ["lsof", "-t", f"-i:{ENV_PORT_LISTEN}"],
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -32,12 +45,12 @@ def kill_process_on_port():
 
         if pids:
             for pid in pids:
-                print(f"Killing process with PID: {pid} on port {config['port_listen']}")
+                print(f"Killing process with PID: {pid} on port {ENV_PORT_LISTEN}")
                 run_command(["kill", "-9", pid])
         else:
-            print(f"No process found on port {config['port_listen']}.")
+            print(f"No process found on port {ENV_PORT_LISTEN}.")
     except subprocess.CalledProcessError as e:
-        print(f"Error checking for processes on port {config['port_listen']}: {e.stderr}")
+        print(f"Error checking for processes on port {ENV_PORT_LISTEN}: {e.stderr}")
 
 def signal_handler(sig, frame):
     print('Received shutdown signal. Cleaning up...')
@@ -55,10 +68,12 @@ def main():
         print("SecretAgent [OPTIONS]")
         print("")
         print("Options:")
-        print("  --intercept-on     Run Intercept immediately (default action)")
-        print("  --startup          register startup agent to run intercept at startup")
-        print("  --intercept-off    Stop Intercept agent and uninstall certificate")
-        print("  --remove-startup   remove agent at startup")
+        print("  --intercept-on         Run Intercept immediately")
+        print("  --intercept-off        Stop Intercept agent and uninstall certificate")
+        print("  --startup              register startup agent to run intercept at startup")
+        print("  --remove-startup       remove agent at startup")
+        print("  --add-certificate      Install ssl certificate")
+        print("  --remove-certificate   uninstall ssl certificate")
         print("")
         sys.exit(0)
 
@@ -71,6 +86,16 @@ def main():
         unload_and_remove_launch_agent()
 
         print("Remove from Startup complete.")
+
+    if "--add-certificate" in sys.argv:
+        install_cert_to_keychain()
+
+        print("Install Certificate")
+
+    if "--remove-certificate" in sys.argv:
+        remove_cert_from_keychain()
+
+        print("Uninstall Certificate")
 
     if "--intercept-off" in sys.argv:
         cleanup()
@@ -87,7 +112,6 @@ def main():
         stop_event.set()
         
         kill_process_on_port()
-        install_cert_to_keychain()
         configure_proxy(True)
         run_proxy_server()
         

@@ -2,12 +2,23 @@ import asyncio
 import os
 from mitmproxy.options import Options
 from mitmproxy.tools.dump import DumpMaster
-from init import load_config
+from env import (
+    ENV_LAUNCH_AGENT_LABEL,
+    ENV_HOME,
+    ENV_LAUNCH_AGENT_DIR,
+    ENV_PLIST_PATH,
+    ENV_HOST_LISTEN,
+    ENV_PORT_LISTEN,
+    ENV_CERT,
+    ENV_CURR_PROJECT_DIR,
+    ENV_PROXY_FILE,
+    ENV_SOURCE_PROXY
+)
 
-config = load_config('config.yml')
+
 
 async def run_proxy_async():
-    options = Options(listen_host=config['host_listen'], listen_port=config['port_listen'])
+    options = Options(listen_host=ENV_HOST_LISTEN, listen_port=ENV_PORT_LISTEN)
     # options = Options(listen_host='localhost', listen_port=8080, certs=[cert_path])
     options.ssl_insecure = False
 
@@ -50,7 +61,7 @@ async def run_proxy_async():
 
     m.addons.add(LoggerAddon())
 
-    print(f"Starting mitmproxy HTTPS intercepting proxy on https://{config['host_listen']}:{config['port_listen']} ...")
+    print(f"Starting mitmproxy HTTPS intercepting proxy on https://{ENV_HOST_LISTEN}:{ENV_PORT_LISTEN} ...")
     await m.run()
 
 
@@ -62,7 +73,7 @@ def run_proxy_server():
 
 
 def write_to_file(file_name, text):
-    file_path = os.path.join(config['curr_project_dir'], file_name)
+    file_path = os.path.join(ENV_CURR_PROJECT_DIR, file_name)
     # Check if the file exists and its size
     if os.path.exists(file_path) and os.path.getsize(file_path) >= 1 * 1024 * 1024:  # 2MB in bytes
         # Rewrite the file if it is 2MB or larger

@@ -1,8 +1,19 @@
 
 from utils import run_command
-from init import load_config
+from env import (
+    ENV_LAUNCH_AGENT_LABEL,
+    ENV_HOME,
+    ENV_LAUNCH_AGENT_DIR,
+    ENV_PLIST_PATH,
+    ENV_HOST_LISTEN,
+    ENV_PORT_LISTEN,
+    ENV_CERT,
+    ENV_CURR_PROJECT_DIR,
+    ENV_PROXY_FILE,
+    ENV_SOURCE_PROXY
+)
 
-config = load_config('config.yml')
+
 
 def install_cert_to_keychain():
     print("Installing the certificate to macOS System Keychain for trust... (requires sudo)")
@@ -11,7 +22,7 @@ def install_cert_to_keychain():
     remove_cert_from_keychain()
     
     run_command(["security", "add-trusted-cert", "-d", "-r", "trustRoot", "-k",
-                 "/Library/Keychains/System.keychain", config['cert']], sudo=True)
+                 "/Library/Keychains/System.keychain", ENV_CERT], sudo=True)
 
     print("Certificate added and trusted to System Keychain.")
 
