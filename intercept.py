@@ -2,6 +2,7 @@ import asyncio
 import os
 from mitmproxy.options import Options
 from mitmproxy.tools.dump import DumpMaster
+from llm import helpAI
 from env import (
     ENV_LAUNCH_AGENT_LABEL,
     ENV_HOME,
@@ -28,10 +29,12 @@ async def run_proxy_async():
         def request(self, flow):
             # Log request method, URL, and payload
             # print(f"Request: {flow.request.method} {flow.request.url}")
-            write_to_file('network.log', f"{flow.request.method} {flow.request.url}\n")
+            payload = flag = ""
+            if flow.request.content:
+                payload = {flow.request.content.decode('utf-8', errors='replace')}
+                flag = helpAI(flow.request.url)
 
-            # if flow.request.content:
-            #     print(f"Request Payload: {flow.request.content.decode('utf-8', errors='replace')}")
+            write_to_file('network.log', f"{flag} {flow.request.method} {flow.request.url} {payload}\n")
 
             # Show the application that triggered the connection
             # self.show_application_info(flow.request.host)
