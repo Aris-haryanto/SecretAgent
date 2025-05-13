@@ -177,3 +177,4 @@ kocak
 .kocak
 config.yml
 .DS_Store
+*.err
