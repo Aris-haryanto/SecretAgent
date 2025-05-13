@@ -3,7 +3,7 @@ import signal
 import subprocess
 import threading
 from src.utils import run_command
-# from src.network.intercept import run_proxy_server
+import cmd.env as env
 import src.network.intercept as Intercept
 import src.ai.llm as AI
 import src.macos.proxy as MacProxy
@@ -11,7 +11,6 @@ import src.macos.watch_proxy as MacWatchproxy
 import src.macos.plist as MacStartup
 import src.macos.certificate as MacCertificate
 import src.adapter as Adapter
-import env
 
 # Create a global variable to control the thread
 stop_event = threading.Event()

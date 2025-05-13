@@ -1,45 +1,47 @@
 # How to use
 
-### create venv
+**⚠️ Warning:** makesure you're in directory `SecretAgent`
+
+### Create Venv
 ```
 python3 -m venv .{name of directory virtual env}
 source .{name of directory virtual env}/bin/activate
 ```
 
-### activate venv
+### Activate Venv
 ```
 source .{name of directory virtual env}/bin/activate
 ```
 
-### deactivate venv
+### Deactivate Venv
 ```
 deactivate
 ```
 
-### install lib
+### Install Lib
 ```
 python3 install -r requirements.txt
 ```
 
 ### Run
 ```
-python3 main.py --intercept-on
+python3 -m cmd.main --intercept-on
 ```
 
-### download llama
+### Download Llama
 https://ollama.com
 
-### list of model
+### List Of model
 ```
 ollama list
 ```
 
-### download model
+### Download Model
 ```
 ollama run deepseek-r1:7b
 ```
 
-### delete model
+### Delete Model
 ```
 ollama rm deepseek-r1:7b
 ```
