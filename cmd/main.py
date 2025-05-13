@@ -1,11 +1,14 @@
 import sys
+import os
 import signal
 import subprocess
 import threading
+import asyncio
 from src.utils import run_command
 import cmd.env as env
 import src.network.intercept as Intercept
 import src.ai.llm as AI
+import src.ai.analyze_network as AnalyzeNetwork
 import src.macos.proxy as MacProxy
 import src.macos.watch_proxy as MacWatchproxy
 import src.macos.plist as MacStartup
@@ -58,11 +61,12 @@ def main():
         print("")
         print("Options:")
         print("  --intercept-on         Run Intercept immediately")
-        print("  --intercept-off        Stop Intercept agent and uninstall certificate")
-        print("  --startup              register startup agent to run intercept at startup")
-        print("  --remove-startup       remove agent at startup")
-        print("  --add-certificate      Install ssl certificate")
-        print("  --remove-certificate   uninstall ssl certificate")
+        print("  --intercept-off        Stop Intercept agent")
+        print("  --startup              Register startup agent to run intercept at startup")
+        print("  --remove-startup       Remove agent at startup")
+        print("  --add-certificate      Install SSL certificate")
+        print("  --remove-certificate   uninstall SSL certificate")
+        print("  --analyze-ai           Run AI analyzer from network.log file")
         print("")
         sys.exit(0)
 
@@ -109,6 +113,23 @@ def main():
 
         print("Certificate removed")
 
+    if "--analyze-ai" in sys.argv:
+        # setup AI 
+        ai = AI.AI(env)
+        
+        analyze_network = AnalyzeNetwork.AnalyzeNetwork(env, ai)
+        watcher_thread = threading.Thread(target=analyze_network.analyze_network, args=(os.path.join(f"{env.ENV_CURR_PROJECT_DIR}", "network.log"), os.path.join(f"{env.ENV_CURR_PROJECT_DIR}", "network-analyze.log"), 10))
+        
+        watcher_thread.daemon = True  # This makes the thread exit when the main program exits
+        watcher_thread.start()  # Start the thread
+
+        # Signal the watcher thread to stop
+        stop_event.set()
+        print("Be patient while AI analyze the network.log . . . ")
+
+        # Wait for the watcher thread to finish
+        watcher_thread.join()
+
     if "--intercept-off" in sys.argv:
         cleanup(proxy)
         return
@@ -118,17 +139,21 @@ def main():
         # Create a thread for the watch_proxy_env_file function
         watcher_thread = threading.Thread(target=watchproxy.check_and_restore_source_lines)
         watcher_thread = threading.Thread(target=watchproxy.watch_proxy_env_file_and_system_proxy)
+
+        # setup AI 
+        ai = AI.AI(env)
+        
+        analyze_network = AnalyzeNetwork.AnalyzeNetwork(env, ai)
+        watcher_thread = threading.Thread(target=analyze_network.analyze_network, args=(os.path.join(f"{env.ENV_CURR_PROJECT_DIR}", "network.log"), os.path.join(f"{env.ENV_CURR_PROJECT_DIR}", "network-analyze.log"), 10))
+        
         watcher_thread.daemon = True  # This makes the thread exit when the main program exits
         watcher_thread.start()  # Start the thread
 
         # Signal the watcher thread to stop
         stop_event.set()
-        
+
         kill_process_on_port()
         proxy.configure_proxy(True)
-
-        # setup AI 
-        ai = AI.AI(env)
 
         # setup network intercept
         svc = Intercept.Intercept(env, ai)

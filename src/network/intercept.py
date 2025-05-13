@@ -56,7 +56,7 @@ class LoggerAddon:
             # Append to the file if it is smaller than 1MB
             with open(file_path, 'a+') as file:
                 file.write(text)
-                print(f"Text has been appended to '{file_path}'.")
+                print(f"Traffic has been write to '{file_path}'.")
 
         # Show the application that triggered the connection
         # self.show_application_info(flow.request.host)
