@@ -1,49 +1,72 @@
-# How to use
+# SecretAgent
 
-**⚠️ Warning:** makesure you're in directory `SecretAgent`
+**SecretAgent** is a Python-based **MITM (Man-in-the-Middle) proxy** tool designed to intercept, inspect, and analyze HTTPS and HTTP network traffic. Built for security teams and researchers, it enables visibility into encrypted sessions and supports AI-based inspection using local models via [Ollama](https://ollama.com/).
 
-### Create Venv
-```
-python3 -m venv .{name of directory virtual env}
-source .{name of directory virtual env}/bin/activate
+> 🔍 Tested on macOS. Compatibility for Linux and Windows is planned.
+
+---
+
+## ⚙️ Features
+
+- 🔐 **MITM Proxy for HTTPS/HTTP**  
+  Intercept and inspect live network traffic, including decrypted HTTPS payloads.
+
+- 🧠 **AI Integration with Ollama** *(Experimental)*  
+  Use local LLMs to analyze request contents and detect anomalies or threats.
+
+- 📡 **Real-Time Traffic Monitoring**  
+  See URLs, headers, payloads, and metadata instantly in your terminal.
+
+- 🐍 **Python-Based and Simple**  
+  Lightweight codebase, easy to understand and extend.
+
+---
+
+## 🔍 Use Cases
+
+- Malware traffic inspection
+- Suspicious outbound request monitoring
+- Internal research on encrypted network behavior
+- Traffic classification using LLMs
+- Building custom traffic rules for threat detection
+
+---
+
+## 🛠️ Requirements
+
+- Python 3.8 or newer  
+- [Ollama](https://ollama.com/) for local AI analysis *(optional)*
+
+---
+
+## 📦 Setup
+
+```bash
+# Clone repo on your local
+$ git clone https://github.com/Aris-haryanto/SecretAgent.git
+$ cd SecretAgent
+
+# create virtual env
+$ python3 -m venv .{name of directory virtual env}
+$ source .{name of directory virtual env}/bin/activate
+
+# install all of requirements
+$ pip install -r requirements.txt
+
+# Download Model
+$ ollama run granite3.2:8b
+
+# Run 
+$ python3 -m cmd.main --intercept-on
 ```
 
-### Activate Venv
-```
-source .{name of directory virtual env}/bin/activate
-```
+## 🗺️ Roadmap
+- Full Linux and Windows support
+- Train AI to detect more malicious url 
+- more protection so it's Cannot be bypassed by threats
+- User Activity so we can combined like UBA
+- Export logs and alerts for SIEM/SOC workflows
 
-### Deactivate Venv
-```
-deactivate
-```
-
-### Install Lib
-```
-python3 install -r requirements.txt
-```
-
-### Run
-```
-python3 -m cmd.main --intercept-on
-```
-
-### Download Llama
-https://ollama.com
-
-### List Of model
-```
-ollama list
-```
-
-### Download Model
-```
-ollama run deepseek-r1:7b
-```
-
-### Delete Model
-```
-ollama rm deepseek-r1:7b
-```
-
-
+## 🤝 Contributing
+Contributions are welcome!
+Whether it's bug fixes, new features, or AI rule enhancements.
