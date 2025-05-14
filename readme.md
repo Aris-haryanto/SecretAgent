@@ -38,7 +38,7 @@ More example and explanation here https://arisharyanto.medium.com/mitm-https-pay
 ## 🛠️ Requirements
 
 - Python 3.8 or newer  
-- [Ollama](https://ollama.com/) for local AI analysis *(optional)*
+- [Ollama](https://ollama.com/) for local AI analysis
 
 ---
 
