@@ -59,6 +59,9 @@ $ pip install -r requirements.txt
 # Download Model
 $ ollama run granite3.2:8b
 
+# make sure you run this first once to install certificate before run intercept
+$ python3 -m cmd.main --add-certificate
+
 # Run 
 $ python3 -m cmd.main --intercept-on
 ```
