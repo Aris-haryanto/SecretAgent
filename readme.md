@@ -4,6 +4,9 @@
 
 > 🔍 Tested on macOS. Compatibility for Linux and Windows is planned.
 
+## 📖 Example
+More example and explanation here https://arisharyanto.medium.com/mitm-https-payload-with-python-499ebf8e933f
+
 ---
 
 ## ⚙️ Features
